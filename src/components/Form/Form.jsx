@@ -1,6 +1,7 @@
+import PropTypes from 'prop-types'
 import { useState } from 'react'
 import { AUTHOR } from '../../constants'
-import { Button } from '../ui/Button'
+// import { Button } from '../ui/Button'
 import IButton from '@mui/material/Button'
 
 export function Form({ addMessage }) {

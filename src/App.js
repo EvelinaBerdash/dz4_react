@@ -1,38 +1,65 @@
-import { useState, useEffect } from 'react'
+import { Routes, Route } from 'react-router-dom'
+import { nanoid } from 'nanoid'
 
-import { Form } from './components/Form/Form'
+import { Header } from "./components/Header/Header"
+import { MainPage } from './pages/MainPage'
+import { ProfilePage } from './pages/ProfilePage'
+import { ChatsPage } from './pages/ChatsPage'
+import { ChatList } from './components/ChatsList/ChatList'
+import { useState } from 'react'
 import { MessageList } from './components/MessageList/MessageList'
 
-import { AUTHOR } from './constants'
+const defaultMessages = {
+  default: [
+    {
+      author: 'user',
+      text: 'one text'
+    },
+    {
+      author: 'user',
+      text: 'two text'
+    }
+  ]
+}
 
 export function App() {
- const [messages, setMessages] = useState([])
+  const [messages, setMessages] = useState(defaultMessages)
 
- const addMessage = (newMessage) => {
-  console.log('newMessage', newMessage);
-  setMessages([...messages, newMessage])
- }
+  const chats = Object.keys(messages).map((chat) => ({
+    id: nanoid(),
+    name: chat
+  }))
 
+  const onAddChat = (newChat) => {
+    console.log('newChat', newChat)
+    setMessages({
+      ...messages,
+      [newChat.name]: []
+    })
+  }
 
- useEffect(() => {
-  if (messages.length > 0 && messages[messages.length - 1].author === AUTHOR.user) {
-    const timeout = setTimeout(() => {
-      addMessage({
-        author: AUTHOR.bot,
-        text: 'hello'
-      })
-    }, 1500)
-    
-    return () => {
-      clearTimeout(timeout)
-     }
-  }  
- }, [messages])
+  const onAddMessage = (chatId, newMessage) => {
+    setMessages({
+      ...messages,
+      [chatId]: [...messages[chatId], newMessage]
+    })
+  }
+
   return (
     <>
-    <h1>Welcome to chat</h1>
-    <Form addMessage={addMessage} />
-    <MessageList messages={messages}/>
+      <Routes>
+        <Route path='/' element={<Header />}>
+          <Route index element={<MainPage />} />
+          <Route path='/profile' element={<ProfilePage />} />
+          <Route path='chats'>
+            <Route index element={<ChatList chats={chats} onAddChat={onAddChat}/>} />
+            <Route path=':chatId' element={<ChatsPage chats={chats} messages={messages} onAddMessage={onAddMessage} onAddChat={onAddChat}/>} />
+          </Route>
+        </Route>
+
+        <Route path='*' element={<h2>404 Page not FOUND</h2>} />
+      </Routes>
+      {/* <Header /> */}
     </>
   )
 }
